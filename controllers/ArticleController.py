@@ -1,3 +1,9 @@
+from flask import Blueprint, app, jsonify
+
+from initializer.TablesRelations import article_tags
+from model.Article import Article
+
+
 class ArticleController:
 
     def get_all_articles(self):
@@ -5,6 +11,8 @@ class ArticleController:
         Get all articles by any user
         :return:
         """
+        articles = Article.query.all()
+        return jsonify([article.to_dict() for article in articles])
 
     def filter_articles(self) -> list:
         """
@@ -23,3 +31,10 @@ class ArticleController:
         User can delete their own articles
         :return:
         """
+
+    def create_article(self):
+        """
+        Creates a new article
+        :return:
+        """
+
