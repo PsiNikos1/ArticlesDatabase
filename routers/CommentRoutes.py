@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from controllers.CommentController import CommentController
 
-comment_blueprint = Blueprint('comments', __name__)
+comment_blueprint = Blueprint('comments', __name__, url_prefix='/comment')
 
 controller = CommentController()
 

@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from controllers.ArticleController import ArticleController
 
-article_blueprint = Blueprint('articles', __name__)
+article_blueprint = Blueprint('articles', __name__, url_prefix='/article')
 
 controller = ArticleController()
 
