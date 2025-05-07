@@ -5,7 +5,7 @@ from initializer._init_ import init_db, db
 from routers.ArticleRoutes import article_blueprint
 from routers.AuthorRoutes import author_blueprint
 from routers.CommentRoutes import comment_blueprint
-
+from routers.TagRoutes import tag_blueprint
 
 app = Flask(__name__)
 init_db(app)
@@ -20,6 +20,9 @@ with app.app_context():
 app.register_blueprint(article_blueprint)
 app.register_blueprint(comment_blueprint)
 app.register_blueprint(author_blueprint)
+app.register_blueprint(tag_blueprint)
+
+
 
 
 if __name__ == '__main__':
