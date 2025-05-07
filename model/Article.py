@@ -23,7 +23,8 @@ class Article(db.Model):
             "title": self.title,
             "abstract": self.abstract,
             "publication_date": self.publication_date,
-            "authors": [author.to_dict() for author in self.authors]
+            "authors": [author.to_dict() for author in self.authors],
+            "comments": [comment.to_dict() for comment in self.comments]
         }
 
 
