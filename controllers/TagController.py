@@ -1,5 +1,15 @@
+from model.Tag import Tag
+
 
 class TagController:
+
+    def get_all_tags(self):
+        """
+        Get all tags
+        :return:
+        """
+        tags = Tag.query.all()
+        return [tag.to_dict() for  tag in tags]
 
     def create_tag(self):"""
         Create a tag on an article
