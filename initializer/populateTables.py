@@ -3,6 +3,7 @@ from datetime import datetime
 from initializer._init_ import db
 from model.Article import Article
 from model.Author import Author
+from model.Comment import Comment
 from model.Tag import Tag
 
 
@@ -15,7 +16,7 @@ def populate_authors():
 
     db.session.commit()
 
-def populate_articles():
+def populate_articles_and_tags():
     articles = [
         {
             "identifier": "LBJ1",
@@ -43,6 +44,8 @@ def populate_articles():
             abstract=data["abstract"],
             publication_date=datetime.strptime(data["publication_date"], "%Y-%m-%d")
         )
+        db.session.add(article)
+
 
         article.authors = []
         for author_name in data["authors"]:
@@ -60,5 +63,21 @@ def populate_articles():
                 db.session.add(tag)
             article.tags.append(tag)
 
-        db.session.add(article)
+    db.session.commit()
+
+def populate_comments():
+    from model.Article import Article  # imported here to avoid circular import
+
+    first_article = Article.query.filter_by(identifier="LBJ1").first()
+    second_article = Article.query.filter_by(identifier="MJvsLBJ").first()
+
+    if first_article:
+        comment1 = Comment(content="Lebron is the best!", author="Steph Curry", article_id=first_article.id)
+        comment2 = Comment(content="Kareem is the best! Go Kareem!", author="Dennis Rodman", article_id=first_article.id)
+        db.session.add_all([comment1, comment2])
+
+    if second_article:
+        comment3 = Comment(content="Jordan is the best.", author="Dennis Rodman", article_id=second_article.id)
+        db.session.add(comment3)
+
     db.session.commit()
