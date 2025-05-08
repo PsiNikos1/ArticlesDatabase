@@ -2,6 +2,7 @@ from flask import Flask
 
 from initializer import populateTables
 from initializer._init_ import init_db, db
+from initializer.populateTables import create_fake_data
 from routers.ArticleRoutes import article_blueprint
 from routers.AuthorRoutes import author_blueprint
 from routers.CommentRoutes import comment_blueprint
@@ -13,7 +14,8 @@ init_db(app)
 with app.app_context():
     db.drop_all()
     db.create_all()
-    populateTables.run_all_populations()
+    create_fake_data(num_articles=100, num_authors=20, num_tags=15)
+
 
 app.register_blueprint(article_blueprint)
 app.register_blueprint(comment_blueprint)

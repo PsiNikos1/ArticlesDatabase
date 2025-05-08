@@ -1,88 +1,54 @@
-from datetime import datetime
-
+from faker import Faker
+import random
 from initializer._init_ import db
 from model.Article import Article
 from model.Author import Author
 from model.Comment import Comment
 from model.Tag import Tag
 
+fake = Faker()
 
-def populate_authors():
-    authors = ["Lebron James", "Micheal Jordan", "Steph Curry", "Kareem Abdul Jabbar", "Dennis Rodman"]
+def create_fake_data(num_articles=50, num_authors=10, num_tags=10):
+    # Step 1: Create Authors
+    authors = []
+    for _ in range(num_authors):
+        author = Author(name=fake.name())
+        db.session.add(author)
+        authors.append(author)
 
-    for name in authors:
-        if not Author.query.filter_by(name=name).first():
-            db.session.add(Author(name=name))
+    # Step 2: Create Tags
+    tags = []
+    for _ in range(num_tags):
+        tag = Tag(content=fake.word())
+        db.session.add(tag)
+        tags.append(tag)
 
     db.session.commit()
 
-def populate_articles_and_tags():
-    articles = [
-        {
-            "identifier": "LBJ1",
-            "title": "Most points in NBA history",
-            "abstract": "This article explains is about LBJ becoming #1 in all time scoring list",
-            "publication_date": "2023-02-07",
-            "authors": ["Lebron James", "Kareem Abdul Jabbar"],
-            "tags": ["NBA", "most_points"]
-        },
-        {
-            "identifier": "MJvsLBJ",
-            "title": "Who is the NBA GOAT",
-            "abstract": "This article settles the GOAT debate once and for all.",
-            "publication_date": "2024-06-20",
-            "authors": ["Dennis Rodman", "Kareem Abdul Jabbar"],
-            "tags": ["GOAT", "NBA"]
-        }
-
-    ]
-
-    for data in articles:
+    # Step 3: Create Articles
+    articles = []
+    for _ in range(num_articles):
         article = Article(
-            identifier=data["identifier"],
-            title=data["title"],
-            abstract=data["abstract"],
-            publication_date=datetime.strptime(data["publication_date"], "%Y-%m-%d")
+            identifier=fake.uuid4(),
+            title=fake.sentence(nb_words=6),
+            abstract=fake.paragraph(nb_sentences=3),
+            publication_date=fake.date_this_decade()
         )
+        article.authors = random.sample(authors, k=random.randint(1, 3))
+        article.tags = random.sample(tags, k=random.randint(1, 4))
         db.session.add(article)
-
-
-        article.authors = []
-        for author_name in data["authors"]:
-            author = Author.query.filter_by(name=author_name).first()
-            if not author:
-                author = Author(name=author_name)
-                db.session.add(author)
-            article.authors.append(author)
-
-        article.tags = []
-        for tag_name in data["tags"]:
-            tag = Tag.query.filter_by(content=tag_name).first()
-            if not tag:
-                tag = Tag(content=tag_name)
-                db.session.add(tag)
-            article.tags.append(tag)
+        articles.append(article)
 
     db.session.commit()
 
-def populate_comments():
-    from model.Article import Article  # imported here to avoid circular import
-
-    first_article = Article.query.filter_by(identifier="LBJ1").first()
-    second_article = Article.query.filter_by(identifier="MJvsLBJ").first()
-
-    if first_article:
-        comment1 = Comment(content="Lebron is the best!", user="Steph Curry fan", article_id=first_article.id)
-        comment2 = Comment(content="Kareem is the best! Go Kareem!", user="Kareem fan", article_id=first_article.id)
-        db.session.add_all([comment1, comment2])
-
-    if second_article:
-        comment3 = Comment(content="Jordan is the best.", user="Jordan fan", article_id=second_article.id)
-        db.session.add(comment3)
+    # Step 4: Add Comments
+    for article in articles:
+        for _ in range(random.randint(1, 5)):
+            comment = Comment(
+                content=fake.sentence(),
+                user=fake.user_name(),
+                article_id=article.id
+            )
+            db.session.add(comment)
 
     db.session.commit()
-
-def run_all_populations():
-    populate_authors()
-    populate_articles_and_tags()
-    populate_comments()
