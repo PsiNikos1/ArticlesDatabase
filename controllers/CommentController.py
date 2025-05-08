@@ -8,10 +8,22 @@ from model.Comment import Comment
 class CommentController:
 
     def create_comment(self):
-        """
-        User can Create comments on any article
-        :return:
-        """
+        data = request.json
+
+        if not data.get("article_id") or not data.get("user") or not data.get("content"):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        comment = Comment(
+            content=data["content"],
+            user=data["user"],
+            article_id=data["article_id"]
+        )
+
+        db.session.add(comment)
+        db.session.commit()
+
+        return jsonify({"message": "Comment created", "id": comment.id}), 201
+
 
     def update_comment(self):
         """

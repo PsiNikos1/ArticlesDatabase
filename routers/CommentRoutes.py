@@ -10,3 +10,4 @@ comment_blueprint.add_url_rule('/getComments/<int:article_id>', methods=['GET'],
 comment_blueprint.add_url_rule('/delete/<int:comment_id>', methods=['DELETE'], view_func=controller.delete_comment)
 comment_blueprint.add_url_rule('/getAll', methods=['GET'], view_func=controller.get_all_comments)
 comment_blueprint.add_url_rule('/update', methods=['PUT'], view_func=controller.update_comment)
+comment_blueprint.add_url_rule('/create', methods=['POST'], view_func=controller.create_comment)

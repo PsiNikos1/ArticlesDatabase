@@ -72,12 +72,12 @@ def populate_comments():
     second_article = Article.query.filter_by(identifier="MJvsLBJ").first()
 
     if first_article:
-        comment1 = Comment(content="Lebron is the best!", author="Steph Curry", article_id=first_article.id)
-        comment2 = Comment(content="Kareem is the best! Go Kareem!", author="Dennis Rodman", article_id=first_article.id)
+        comment1 = Comment(content="Lebron is the best!", user="Steph Curry fan", article_id=first_article.id)
+        comment2 = Comment(content="Kareem is the best! Go Kareem!", user="Kareem fan", article_id=first_article.id)
         db.session.add_all([comment1, comment2])
 
     if second_article:
-        comment3 = Comment(content="Jordan is the best.", author="Dennis Rodman", article_id=second_article.id)
+        comment3 = Comment(content="Jordan is the best.", user="Jordan fan", article_id=second_article.id)
         db.session.add(comment3)
 
     db.session.commit()
