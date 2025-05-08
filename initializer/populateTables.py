@@ -81,3 +81,8 @@ def populate_comments():
         db.session.add(comment3)
 
     db.session.commit()
+
+def run_all_populations():
+    populate_authors()
+    populate_articles_and_tags()
+    populate_comments()

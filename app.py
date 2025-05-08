@@ -13,9 +13,7 @@ init_db(app)
 with app.app_context():
     db.drop_all()
     db.create_all()
-    populateTables.populate_authors()
-    populateTables.populate_articles_and_tags()
-    populateTables.populate_comments()
+    populateTables.run_all_populations()
 
 app.register_blueprint(article_blueprint)
 app.register_blueprint(comment_blueprint)
