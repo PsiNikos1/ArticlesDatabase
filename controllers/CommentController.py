@@ -27,25 +27,30 @@ class CommentController:
 
     def update_comment(self):
         """
-        User can Update comments on any article
+        User can Update comments on any article. Should only change the content.
         :return:
         """
         data = request.json
         comment = Comment.query.get_or_404(data["id"])
+        if data["user"] != comment.user:
+            return jsonify({"error": "Action is forbidden"}), 403
         new_content = data["content"]
         if not new_content:
             return jsonify({"error": "Missing 'content' field"}), 400
         comment.content = new_content
         db.session.commit()
-        return jsonify({"message": "Comment updated"}), 204
+        return jsonify({"message": "Comment updated"}), 200
 
 
-    def delete_comment(self, comment_id):
+    def delete_comment(self):
         """
         User can Delete comments on any article
         :return:
         """
-        comment = Comment.query.get_or_404(comment_id)
+        data = request.json
+        comment = Comment.query.get_or_404(data["id"])
+        if data["user"] != comment.user:
+            return jsonify({"error": "Action is forbidden"}), 403
         db.session.delete(comment)
         db.session.commit()
         return jsonify({"message": f"Author with id {comment.id} deleted"})
