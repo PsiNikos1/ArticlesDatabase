@@ -24,36 +24,35 @@ class ArticleController:
         User can update their own articles
         :return:
         """
-
-
         data = request.json
         article_id = data["id"]
         article = Article.query.get_or_404(article_id)
 
+        if data["user"] not in [author.name for author in article.authors]:
+            return jsonify({"error": "Unauthorized"}), 403
+
+
         article.title = data.get("title", article.title)
         article.abstract = data.get("abstract", article.abstract)
-
-        pub_date = data.get("publication_date")
-        if pub_date:
-            article.publication_date = datetime.strptime(pub_date, "%Y-%m-%d")
+        article.identifier = data.get("abstract", article.identifier)
 
         # Update authors
         if "authors" in data:
             article.authors = []
-            for name in data["authors"]:
-                author = Author.query.filter_by(name=name).first()
+            for author_data in data["authors"]:
+                author = Author.query.filter_by(name=author_data["name"]).first()
                 if not author:
-                    author = Author(name=name)
+                    author = Author(name=author_data["name"])
                     db.session.add(author)
                 article.authors.append(author)
 
         # Update tags
         if "tags" in data:
             article.tags = []
-            for name in data["tags"]:
-                tag = Tag.query.filter_by(name=name).first()
+            for tag_data in data["tags"]:
+                tag = Tag.query.filter_by(content=tag_data["content"]).first()
                 if not tag:
-                    tag = Tag(name=name)
+                    tag = Tag(content=tag_data["content"])
                     db.session.add(tag)
                 article.tags.append(tag)
 
@@ -62,15 +61,19 @@ class ArticleController:
 
 
 
-    def delete_article(self, article_id):
+    def delete_article(self):
         """
         User can delete their own articles by it unique id
         :return:
         """
-        article = Article.query.get_or_404(article_id)
+        data = request.json
+        article = Article.query.get_or_404(data["article_id"])
+        if data["user"] not in [author.name for author in article.authors]:
+            return jsonify({"error": "Unauthorized"}), 403
+
         db.session.delete(article)
         db.session.commit()
-        return jsonify({"message": f"Author with id {article.id} deleted"})
+        return jsonify({"message": f"Article with id {article.id}  & title '{article.title}' has been deleted"})
 
 
     def createArticle(self):
