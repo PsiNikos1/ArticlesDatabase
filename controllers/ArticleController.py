@@ -153,7 +153,7 @@ class ArticleController:
         return jsonify([a.to_dict() for a in results]), 200
 
     def download_filtered_articles_csv(self):
-        data = request.json or {}
+        data = request.get_json()
         query = Article.query
 
         for key, value in data.items():
