@@ -153,9 +153,8 @@ class ArticleController:
         return jsonify([a.to_dict() for a in results]), 200
 
     def download_filtered_articles_csv(self):
-        data = request.json
+        data = request.json or {}
         query = Article.query
-        print("hi")
 
         for key, value in data.items():
             if key == "year":
@@ -199,13 +198,13 @@ class ArticleController:
         # Write CSV
         si = StringIO()
         writer = csv.writer(si)
-        writer.writerow(["ID", "Identifier", "Title", "Publication Date", "Authors", "Tags"])
+        writer.writerow(["ID", "Title", "Abstract", "Publication Date", "Authors", "Tags"])
 
         for article in articles:
             writer.writerow([
                 article.id,
-                article.identifier,
                 article.title,
+                article.abstract,
                 article.publication_date,
                 "; ".join(a.name for a in article.authors),
                 "; ".join(t.content for t in article.tags)

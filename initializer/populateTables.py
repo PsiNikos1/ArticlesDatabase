@@ -29,7 +29,6 @@ def create_fake_data(num_articles=50, num_authors=10, num_tags=10):
     articles = []
     for _ in range(num_articles):
         article = Article(
-            identifier=fake.uuid4(),
             title=fake.sentence(nb_words=6),
             abstract=fake.paragraph(nb_sentences=3),
             publication_date=fake.date_this_decade()

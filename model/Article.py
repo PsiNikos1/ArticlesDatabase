@@ -6,7 +6,7 @@ from model.Comment import Comment
 class Article(db.Model):
     __tablename__ = 'article'
     id = db.Column(db.Integer, primary_key=True)
-    identifier = db.Column(db.String(100), unique=True, nullable=False)
+    # identifier = db.Column(db.String(100), unique=True, nullable=False)
     title = db.Column(db.String(200), nullable=False)
     abstract = db.Column(db.Text)
     publication_date = db.Column(db.Date)
@@ -19,7 +19,6 @@ class Article(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "identifier": self.identifier,
             "title": self.title,
             "abstract": self.abstract,
             "publication_date": self.publication_date,
