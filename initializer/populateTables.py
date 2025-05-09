@@ -16,7 +16,8 @@ def create_fake_data(num_articles=50, num_authors=10, num_tags=10):
         db.session.add(author)
         authors.append(author)
 
-    # Step 2: Create Tags
+    db.session.commit()
+
     tags = []
     for _ in range(num_tags):
         tag = Tag(content=fake.word())
