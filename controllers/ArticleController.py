@@ -1,9 +1,10 @@
 import csv
 from datetime import datetime
 from io import BytesIO, StringIO
+from itertools import count
 
 from flask import jsonify, request, send_file
-from sqlalchemy import extract, or_
+from sqlalchemy import extract, or_, and_
 
 from initializer._init_ import db
 from model.Article import Article
@@ -13,12 +14,17 @@ from model.Tag import Tag
 
 class ArticleController:
 
-    def get_all_articles(self):
+    def __init__(self):
+        self.per_page = 100
+
+    def get_all_articles(self, page_number):
         """
         Get all articles by any user
         :return:
         """
-        articles = Article.query.all()
+        page = int(page_number)
+        articles = Article.query.paginate(page=page, per_page=self.per_page, error_out=False)
+        print(articles.total)
         return jsonify([article.to_dict() for article in articles]), 200
 
     def update_article(self):
@@ -109,48 +115,70 @@ class ArticleController:
         return jsonify({"message": "Article created", "id": article.id}), 201
 
     def filter_article(self):
-        data = request.json
-        query = Article.query
+        data = request.get_json() or {}
+        page = data.get("page_number")
 
-        for key, value in data.items():
+        query = Article.query
+        conditions = []
+
+        for key, values in data.items():
+            if key in ("page", "per_page"): continue
+            if not isinstance(values, list):
+                values = [values]
+
             if key == "year":
-                query = query.filter(extract("year", Article.publication_date) == value)
+                conditions.append(or_(
+                    *[extract("year", Article.publication_date) == y for y in values]
+                ))
 
             elif key == "month":
-                query = query.filter(extract("month", Article.publication_date) == value)
+                conditions.append(or_(
+                    *[extract("month", Article.publication_date) == m for m in values]
+                ))
 
             elif key == "authors":
-                author_ids = [a.get("id") for a in value if a.get("id")]
-                if author_ids:
-                    query = query.filter(Article.authors.any(Author.id.in_(author_ids)))
+                author_ids = [a.get("id") for a in values if a.get("id")]
+                conditions.append(or_(
+                    *[Article.authors.any(Author.id == aid) for aid in author_ids]
+                ))
 
             elif key == "tags":
-                tags_id = [a.get("id") for a in value if a.get("id")]
-                if tags_id:
-                    query = query.filter(Article.tags.any(Tag.id.in_(tags_id)))
+                tag_ids = [t.get("id") for t in values if t.get("id")]
+                conditions.append(or_(
+                    *[Article.tags.any(Tag.id == tid) for tid in tag_ids]
+                ))
 
             elif key == "title":
-                query = query.filter(Article.title.ilike(f"%{value}%"))
+                conditions.append(or_(
+                    *[Article.title.ilike(f"%{v}%") for v in values]
+                ))
 
             elif key == "abstract":
-                query = query.filter(Article.abstract.ilike(f"%{value}%"))
+                conditions.append(or_(
+                    *[Article.abstract.ilike(f"%{v}%") for v in values]
+                ))
 
             elif key == "identifier":
-                query = query.filter(Article.identifier.ilike(f"%{value}%"))
+                conditions.append(or_(
+                    *[Article.identifier.ilike(f"%{v}%") for v in values]
+                ))
 
             elif key == "keywords":
-                keywords = value if isinstance(value, list) else [value]
-                search_conditions = [
-                    or_(
-                        Article.title.ilike(f"%{kw}%"),
-                        Article.abstract.ilike(f"%{kw}%")
+                keyword_conditions = []
+                for kw in values:
+                    keyword_conditions.append(
+                        or_(
+                            Article.title.ilike(f"%{kw}%"),
+                            Article.abstract.ilike(f"%{kw}%")
+                        )
                     )
-                    for kw in keywords
-                ]
-                query = query.filter(or_(*search_conditions))
+                conditions.append(or_(*keyword_conditions))
 
-        results = query.all()
-        return jsonify([a.to_dict() for a in results]), 200
+        if conditions:
+            query = query.filter(and_(*conditions))
+
+        articles = query.paginate(page=page, per_page=self.per_page, error_out=False)
+        return jsonify([article.to_dict() for article in articles]), 200
 
     def download_filtered_articles_csv(self):
         data = request.get_json()
