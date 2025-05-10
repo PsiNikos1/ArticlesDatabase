@@ -22,7 +22,8 @@ This API is developed with Python, Flask & SQLAlchemy.
 --Pagination
     Every result that has Article return in pages, with each page having up to 100 Articles.
     The page number is specified to the json body.
-    !!!In the /getAll endpoint, the page is given in the URL.
+    !!!In every /getAll endpoint, the page is given in the URL for more comfortable validation.
+    For example: http://127.0.0.1:5000/authors/getAll/page/1
 
 --Filtering Articles
     Assuming we want to filter with all fields included. The SQL command would be something like this:
