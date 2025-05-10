@@ -85,9 +85,10 @@ class ArticleController:
     def createArticle(self):
         data = request.json
 
+        if not data.get("authors"):
+            return jsonify("Authors are empty"), 500
         # Parse and create Article
         article = Article(
-            identifier=data["identifier"],
             title=data["title"],
             abstract=data.get("abstract"),
             publication_date=datetime.strptime(data["publication_date"], "%Y-%m-%d")
@@ -109,9 +110,7 @@ class ArticleController:
                 tag = Tag(name=name)
                 db.session.add(tag)
             article.tags.append(tag)
-
         db.session.commit()
-
         return jsonify({"message": "Article created", "id": article.id}), 201
 
     def filter_article(self):
@@ -129,11 +128,6 @@ class ArticleController:
             if key == "year":
                 conditions.append(or_(
                     *[extract("year", Article.publication_date) == y for y in values]
-                ))
-
-            elif key == "month":
-                conditions.append(or_(
-                    *[extract("month", Article.publication_date) == m for m in values]
                 ))
 
             elif key == "authors":
@@ -158,9 +152,9 @@ class ArticleController:
                     *[Article.abstract.ilike(f"%{v}%") for v in values]
                 ))
 
-            elif key == "identifier":
+            elif key == "title":
                 conditions.append(or_(
-                    *[Article.identifier.ilike(f"%{v}%") for v in values]
+                    *[Article.title.ilike(f"%{v}%") for v in values]
                 ))
 
             elif key == "keywords":
@@ -181,45 +175,61 @@ class ArticleController:
         return jsonify([article.to_dict() for article in articles]), 200
 
     def download_filtered_articles_csv(self):
-        data = request.get_json()
+        data = request.get_json() or {}
+
         query = Article.query
+        conditions = []
+        print("hi")
 
-        for key, value in data.items():
+        for key, values in data.items():
+            if not isinstance(values, list):
+                values = [values]
+
             if key == "year":
-                query = query.filter(extract("year", Article.publication_date) == value)
-
-            elif key == "month":
-                query = query.filter(extract("month", Article.publication_date) == value)
+                conditions.append(or_(
+                    *[extract("year", Article.publication_date) == y for y in values]
+                ))
 
             elif key == "authors":
-                author_ids = [a.get("id") for a in value if a.get("id")]
-                if author_ids:
-                    query = query.filter(Article.authors.any(Author.id.in_(author_ids)))
+                author_ids = [a.get("id") for a in values if a.get("id")]
+                conditions.append(or_(
+                    *[Article.authors.any(Author.id == aid) for aid in author_ids]
+                ))
 
             elif key == "tags":
-                tags_id = [a.get("id") for a in value if a.get("id")]
-                if tags_id:
-                    query = query.filter(Article.tags.any(Tag.id.in_(tags_id)))
+                tag_ids = [t.get("id") for t in values if t.get("id")]
+                conditions.append(or_(
+                    *[Article.tags.any(Tag.id == tid) for tid in tag_ids]
+                ))
 
             elif key == "title":
-                query = query.filter(Article.title.ilike(f"%{value}%"))
+                conditions.append(or_(
+                    *[Article.title.ilike(f"%{v}%") for v in values]
+                ))
 
             elif key == "abstract":
-                query = query.filter(Article.abstract.ilike(f"%{value}%"))
+                conditions.append(or_(
+                    *[Article.abstract.ilike(f"%{v}%") for v in values]
+                ))
 
-            elif key == "identifier":
-                query = query.filter(Article.identifier.ilike(f"%{value}%"))
+            elif key == "title":
+                conditions.append(or_(
+                    *[Article.title.ilike(f"%{v}%") for v in values]
+                ))
 
             elif key == "keywords":
-                keywords = value if isinstance(value, list) else [value]
-                search_conditions = [
-                    or_(
-                        Article.title.ilike(f"%{kw}%"),
-                        Article.abstract.ilike(f"%{kw}%")
+                keyword_conditions = []
+                for kw in values:
+                    keyword_conditions.append(
+                        or_(
+                            Article.title.ilike(f"%{kw}%"),
+                            Article.abstract.ilike(f"%{kw}%")
+                        )
                     )
-                    for kw in keywords
-                ]
-                query = query.filter(or_(*search_conditions))
+                conditions.append(or_(*keyword_conditions))
+
+        if conditions:
+            query = query.filter(and_(*conditions))
 
         articles = query.all()
 
@@ -227,7 +237,6 @@ class ArticleController:
         si = StringIO()
         writer = csv.writer(si)
         writer.writerow(["ID", "Title", "Abstract", "Publication Date", "Authors", "Tags"])
-
         for article in articles:
             writer.writerow([
                 article.id,

@@ -28,12 +28,14 @@ class TagController:
         return jsonify({"message": "Tag created", "id": new_tag.id}), 201
 
 
-    def delete_tag(self, tag_id):
+    def delete_tag(self):
        """
         Delete a tag from the article
        :param tag_id:
        :return:
        """
+       data = request.json
+       tag_id = data.get("id")
        tag = Tag.query.get_or_404(tag_id)
        db.session.delete(tag)
        db.session.commit()
@@ -50,4 +52,4 @@ class TagController:
         tag.content = new_content
         db.session.commit()
 
-        return jsonify({"message": "Author updated"}), 204
+        return jsonify({"message": "Tag updated"}), 204

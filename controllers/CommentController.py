@@ -55,11 +55,15 @@ class CommentController:
         db.session.commit()
         return jsonify({"message": f"Author with id {comment.id} deleted"})
 
-    def get_comments(self, article_id):
+    def get_comments(self):
         """
         User can Get comments on any article
         :return:
         """
+        data = request.json
+        article_id = data.get("article_id", None)
+        if not article_id:
+            return  jsonify("article_id was not given"), 500
         comments = Comment.query.filter_by(article_id=article_id).all()
         return jsonify([comment.to_dict() for comment in comments])
 

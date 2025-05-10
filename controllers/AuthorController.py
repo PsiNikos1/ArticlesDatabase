@@ -32,7 +32,9 @@ class AuthorController:
 
         return jsonify({"message": "Author updated"}), 204
 
-    def delete_author(self, author_id):
+    def delete_author(self):
+        data = request.json
+        author_id = data.get("author_id")
         author = Author.query.get_or_404(author_id)
         db.session.delete(author)
         db.session.commit()

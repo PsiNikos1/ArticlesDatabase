@@ -8,7 +8,7 @@ controller = TagController()
 
 tag_blueprint.add_url_rule('/getAll', methods=['GET'], view_func=controller.get_all_tags)
 tag_blueprint.add_url_rule('/create', methods=['POST'], view_func=controller.create_tag)
-tag_blueprint.add_url_rule('/delete/<int:tag_id>', methods=['DELETE'], view_func=controller.delete_tag)
+tag_blueprint.add_url_rule('/delete', methods=['DELETE'], view_func=controller.delete_tag)
 tag_blueprint.add_url_rule('/update', methods=['PUT'], view_func=controller.update_tag)
 
 
