@@ -55,7 +55,7 @@ class CommentController:
         db.session.commit()
         return jsonify({"message": f"Author with id {comment.id} deleted"})
 
-    def get_comments(self):
+    def get_comments(self, page_number):
         """
         User can Get comments on any article
         :return:
@@ -67,10 +67,11 @@ class CommentController:
         comments = Comment.query.filter_by(article_id=article_id).all()
         return jsonify([comment.to_dict() for comment in comments])
 
-    def get_all_comments(self):
+    def get_all_comments(self,page_number):
         """
         Get all comments on a specific article
         :return:
         """
-        comments = Comment.query.all()
-        return jsonify([comment.to_dict() for comment in comments])
+        page = int(page_number)
+        comments = Comment.query.paginate(page=page, per_page=50, error_out=False)
+        return jsonify([comment.to_dict() for comment in comments]), 200

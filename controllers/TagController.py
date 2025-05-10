@@ -6,14 +6,14 @@ from model.Tag import Tag
 
 class TagController:
 
-    def get_all_tags(self):
+    def get_all_tags(self, page_number):
         """
         Get all tags
         :return:
         """
-        print("hi")
-        tags = Tag.query.all()
-        return [tag.to_dict() for  tag in tags]
+        page = int(page_number)
+        tags = Tag.query.paginate(page=page, per_page=50, error_out=False)
+        return jsonify([tag.to_dict() for tag in tags]), 200
 
     def create_tag(self):
         """

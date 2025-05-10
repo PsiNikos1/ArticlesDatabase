@@ -24,7 +24,6 @@ class ArticleController:
         """
         page = int(page_number)
         articles = Article.query.paginate(page=page, per_page=self.per_page, error_out=False)
-        print(articles.total)
         return jsonify([article.to_dict() for article in articles]), 200
 
     def update_article(self):

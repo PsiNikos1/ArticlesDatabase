@@ -6,9 +6,10 @@ from model.Author import Author
 
 class AuthorController:
 
-    def getAllAuthors(self):
-        authors = Author.query.all()
-        return jsonify([author.to_dict() for author in authors])
+    def getAllAuthors(self, page_number):
+        page = int(page_number)
+        authors = Author.query.paginate(page=page, per_page=50, error_out=False)
+        return jsonify([author.to_dict() for author in authors]), 200
 
     def create_author(self):
         data = request.json
