@@ -15,11 +15,6 @@ from routers.TagRoutes import tag_blueprint
 app = Flask(__name__)
 init_db(app)
 
-with app.app_context():
-    db.drop_all()
-    db.create_all()
-    create_fake_data(num_articles=500, num_authors=20, num_tags=15)
-
 app.register_blueprint(article_blueprint)
 app.register_blueprint(comment_blueprint)
 app.register_blueprint(author_blueprint)
@@ -29,5 +24,5 @@ app.register_blueprint(tag_blueprint)
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
-    # app.run(debug=True)
+    # app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
