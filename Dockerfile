@@ -12,7 +12,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port Flask will run on
-EXPOSE 5000
+EXPOSE 5050
+#Set up db
+RUN python setup_db.py
 
 # Run your app
-CMD ["python", "app.py"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5050", "--workers=4"]
+
