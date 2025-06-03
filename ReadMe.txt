@@ -1,6 +1,7 @@
 Articles Database- Rest  API.
 
-This API is developed with Python, Flask & SQLAlchemy.
+This API is developed with Python, Flask & SQLAlchemy. Also Docker and Gunicorn with 4 workers
+has been implemented for scalability and production.
 
 --ORM MODEL
     Author - Article (Many-To-Many)
@@ -12,8 +13,11 @@ This API is developed with Python, Flask & SQLAlchemy.
     Run the command 'pip install -r requirements.txt' to install the necessary libs.
 
 --Start the API
-    Run the command 'python app.py' to start the server. The api will 'listen'
-    to http://localhost:5000/
+    Assuming docker is downloaded, open CMD and run:
+    docker build -t <api-name> . #To build the dockerFile
+    docker run -p <port_number>:<port_number> <api_name> # To run the api
+    Send http requests to http://localhost:5050
+
 
 --Database preloading
     Upon starting the database is filled with fake Authors, Tags, Articles and Comments
